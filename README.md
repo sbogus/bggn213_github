@@ -3,4 +3,4 @@ My classwork from [BGGN213](https://bioboot.github.io/bggn213_F23/) at UC San Di
 
 - Class 05: [Data vis with GGPLOT](https://github.com/sbogus/bggn213_github/blob/main/20231018_BGGN213_Class05%20copy/20231018_BGGN213_Class05.pdf)
 
-- Class 06: [R Functions and R Packages](https://github.com/sbogus/bggn213_github/tree/331047cdadc7aeeadbf3c403e05029f9b2eae754/20231020_BGGN213_Class06)
+- Class 06: [R Functions and R Packages](https://github.com/sbogus/bggn213_github/main/20231020_BGGN213_Class06/20231020_Class06_BGGN213.pdf)
