@@ -1,0 +1,292 @@
+---
+title: "November 15, 2023 Class 13: Transcriptomics and the analysis of RNA-Seq data"
+author: "Savannah Bogus A69027475"
+format: pdf
+---
+
+```{r}
+counts<-read.csv("airway_scaledcounts.csv",row.names=1)
+metadata<-read.csv("airway_metadata.csv")
+```
+
+```{r}
+head(counts)
+head(metadata)
+```
+
+# Q1 
+
+How many genes are in the dataset? 38,694 genes.
+
+# Q2 
+
+How many control cell lines are there?
+
+```{r}
+table(metadata$dex)
+```
+
+4 control cell lines. 
+
+## Toy differential gene expression
+
+I want to compare the treated and control columns. In order to do this, we have to
+1. identify/separate out control columns
+2. calculate mean value per gene, save as "control.mean"
+3. repeat for treated
+4. compare
+
+```{r}
+control <- metadata[metadata[,"dex"]=="control",]
+control.counts <- counts[ ,control$id]
+control.mean <- rowSums( control.counts )/4 
+head(control.mean)
+```
+
+Or we can use tidyverse
+
+```{r}
+library(dplyr)
+control <- metadata %>% filter(dex=="control")
+control.counts <- counts %>% select(control$id) 
+control.mean <- rowSums(control.counts)/4
+head(control.mean)
+```
+
+I personally think I like tidyverse better because I really like that %>% filter function.
+
+# Q3
+
+How could you add a function that would help? The code above only works if you know how many control values you have because it is hard coded in. 
+
+
+# Q4
+
+```{r}
+treated <- metadata %>% filter(dex=="treated")
+treated.counts <- counts %>% select(treated$id) 
+treated.mean <- rowMeans(treated.counts)
+head(treated.mean)
+```
+
+```{r}
+mean.counts<-data.frame(control.mean, treated.mean)
+colSums(mean.counts)
+```
+
+# Q5a
+
+plot of treated samples vs control samples
+
+```{r}
+plot(control.mean,treated.mean, col=c("darkcyan"))
+```
+
+Now I'm gonna use ggplot :)
+
+```{r}
+library(ggplot2)
+ggplot(mean.counts)+aes(treated.mean,control.mean)+
+  geom_point(color="darkcyan")
+```
+There's like 60k data points, but I cannot hardly see them, so I'll use a log scale to try to see them.
+
+```{r}
+plot(treated.mean,control.mean,log="xy")
+```
+
+Now, we're going to add log2 info because it tends to have better mathematical properties. And then we'll add it to the mean.counts data.frame.
+
+```{r}
+mean.counts$log2fc<-log2(mean.counts$treated.mean/
+                           mean.counts$control.mean)
+head(mean.counts)
+```
+
+There's several examples with no expression (ie. the NaN, which result from trying to divide by 0, and the -Inf, which results from trying to take the log of a 0.). We should remove those.
+
+```{r}
+zero.values<- which(mean.counts[,1:2]==0, arr.ind=TRUE)
+
+to.rm<-unique(zero.values[,1])
+mycounts<-mean.counts[-to.rm,]
+```
+
+
+#Q7 
+
+The purpose of the arr.ind I didn't understand initially, so I had to ask Claude. It is used to extract elements from arrays, and without that portion of the code, `zero.values` is listed as values, and with that bit of code, it is listed as data and is something I can actually click on and look at. 
+ And `unique` is going to keep us from double counting rows that have 0 in multiple values. 
+ 
+# Q9 and Q10
+ 
+ Next, we're going to do up and down regulation.
+ 
+```{r}
+nrow(mycounts)
+upreg<-mycounts$log2fc>2
+downreg<-mycounts$log2fc< (-2)
+
+sum(upreg)
+sum(downreg)
+```
+ There are 21817 genes left that did not have a 0, and there are 250 upregulated and 367 downregulated genes. 
+ 
+# Q11
+ 
+Do I trust these results? We haven't look at any p-values yet, which are usually a huge portion of volcano plots.  
+
+## Setting up for DESeq
+
+
+```{r}
+library(DESeq2)
+```
+
+
+```{r}
+dds<-DESeqDataSetFromMatrix(countData=counts,
+                       colData=metadata,
+                       design=~dex)
+```
+
+```{r}
+dds<-DESeq(dds)
+```
+To get results from this `dds` thing in a usable way, use the DESeq `results()` function
+
+```{r}
+res<-results(dds)
+head(res)
+```
+## Data Visualization
+
+Do you remember the volcano plot from the paper discussion today? We're gonna make one.
+
+```{r}
+mycolors<- rep("cyan",nrow(res))
+mycolors[res$log2FoldChange>2]<-"darkcyan"
+mycolors[res$log2FoldChange<(-2)]<-"darkcyan"
+mycolors[res$padj > 0.05]<-"darkorange3"
+```
+
+```{r}
+plot(res$log2FoldChange,-log(res$padj),
+     xlab="-log P-value",
+     ylab="Log2 Fold-Change",
+     col=mycolors,
+     abline(v=c(2,-2),col="violet",lty=2)
+     )
+abline(h=-log(0.05), col="pink", lty=2)
+    
+```
+
+
+```{r}
+write.csv(res,file="myresults.csv")
+```
+
+
+## Adding Annotation Data
+
+We need to translate/map our ensemble IDs into gene names or else we don't know what the f is going on. 
+```{r}
+library(AnnotationDbi)
+library("org.Hs.eg.db")
+```
+
+`org.Hs.eg.db` is in a special format, so we have to use a special function `columns(org.Hs.eg.db") in order to read it. 
+```{r}
+columns(org.Hs.eg.db)
+```
+
+Our current data uses ENSEMBL IDs, and we're gonna map to SYMBOL, via `mapIds()`
+
+```{r}
+res$symbol <- mapIds(org.Hs.eg.db,
+                     keys=row.names(res), # Our genenames
+                     keytype="ENSEMBL",        # The format of our genenames
+                     column="SYMBOL",          # The new format we want to add
+                     multiVals="first") #this means what do we do if there's multiple values present, and this says to use the first value
+```
+
+```{r}
+head(res$symbol)
+```
+
+We're going to add a few more mappings because we want to look at pathways.
+
+# Q11
+
+We're gonna run the mapIds 2x more to add Entrez ID and UniProt accession 
+
+```{r}
+res$entrez<-mapIds(org.Hs.eg.db,
+                     keys=row.names(res), 
+                     keytype="ENSEMBL",        
+                     column="ENTREZID",         
+                     multiVals="first")
+```
+
+```{r}
+res$uniprot<-mapIds(org.Hs.eg.db,
+                     keys=row.names(res), # Our genenames
+                     keytype="ENSEMBL",        # The format of our genenames
+                     column="UNIPROT",          # The new format we want to add
+                     multiVals="first")
+```
+
+```{r}
+res$genename<-mapIds(org.Hs.eg.db,
+                     keys=row.names(res), 
+                     keytype="ENSEMBL",        
+                     column="GENENAME",          
+                     multiVals="first")
+```
+
+We can order results by adjusted p value
+
+```{r}
+ordered<-order(res$padj)
+
+head(res[ordered,])
+```
+## Pathway Analysis
+
+To do this, we're gonna install a few more packages.
+
+```{r}
+library(pathview)
+library(gage)
+library(gageData)
+```
+```{r}
+data(kegg.sets.hs)
+head(kegg.sets.hs,2)
+```
+gage needs a vector it won't know what to do with DESeq stuff, and gage speaks ENTREZ, so names have to be in ENTREZ format
+```{r}
+foldchanges=res$log2FoldChange
+names(foldchanges)=res$entrez
+head(foldchanges)
+```
+
+```{r}
+keggres=gage(foldchanges,gsets=kegg.sets.hs)
+attributes(keggres)
+```
+Next, look at the first 3 less than genes. 
+
+```{r}
+head(keggres$less,3)
+```
+
+hsa05332 is the kegg identifier. We're gonna look at asthma because that's what he used to work on. So now we'll make a pathway viewer. 
+
+```{r}
+pathview(gene.data=foldchanges,pathway.id="hsa05310")
+```
+
+![](hsa05310.pathview.png)
+
+
