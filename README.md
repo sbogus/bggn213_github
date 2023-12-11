@@ -5,4 +5,4 @@ My classwork from [BGGN213](https://bioboot.github.io/bggn213_F23/) at UC San Di
 
 - Class 06: [R Functions and R Packages](https://github.com/sbogus/bggn213_github/blob/main/20231020_BGGN213_Class06/20231020_Class06_BGGN213.pdf)
 
--Class 07: [Introduction to Machine Learning](https://github.com/sbogus/bggn213_github/blob/main/20231025_Class07_BGGN213.pdf)
+- Class 07: [Introduction to Machine Learning](https://github.com/sbogus/bggn213_github/blob/main/20231025_Class07_BGGN213/20231025_Class07_BGGN213_SB.pdf)
