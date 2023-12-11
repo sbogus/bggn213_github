@@ -1,0 +1,76 @@
+    1  uptime
+    2  whoami
+    3  curl -O https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
+    4  gzip -d sratoolkit.current-ubuntu64.tar.gz 
+    5  ls
+    6  tar -xvf sratoolkit.current-ubuntu64.tar 
+    7  ls
+    8  ls sratoolkit.3.0.7-ubuntu64/
+    9  cd sratoolkit.3.0.1-ubuntu64/bin
+   10  cd sratoolkit.3.0.7-ubuntu64/
+   11  pwd
+   12  cd sratoolkit.3.0.7-ubuntu64/
+   13  pwd
+   14  ls sratoolkit.3.0.7-ubuntu64/bin/prefetch
+   15  whoami
+   16  pwd
+   17  ls
+   18  cd ./bin/
+   19  ls
+   20  ls prefetch
+   21  cd ~
+   22  ls sratoolkit.3.0.7-ubuntu64/bin/prefetch
+   23  sratoolkit.3.0.7-ubuntu64/bin/prefetch
+   24  prefetch
+   25  sratoolkit.3.0.7-ubuntu64/bin/prefetch
+   26  echo $PATH
+   27  ls /user/local/bin
+   28  ls /usr/local/bin
+   29  export PATH=$PATH:/home/ubuntu/sratoolkit.3.0.7-ubuntu64/bin/
+   30  prefetch
+   31  prefetch SRR600956
+   32  ls
+   33  fastq-dump SRR600956
+   34  bg
+   35  ps
+   36  ls
+   37  head SRR600956.fastq 
+   38  grep -c "@SRR600956" SRR600956.fastq 
+   39  $ prefetch SRR2156848
+   40  prefetch SRR2156848
+   41  $ fastq-dump --split-3 SRR2156848
+   42  Read 2959900 spots for SRR2156848 
+   43  Written 2959900 spots for SRR2156848 
+   44  fastq-dump --split-3 SRR215684
+   45  fastq-dump --split-3 SRR2156848
+   46  Read 2959900 spots for SRR2156848 
+   47  prefetch SRR2156849 SRR2156850 SRR2156851
+   48  fastq-dump --split-3 SRR2156849 SRR2156850 SRR2156851
+   49  fastq-dump --split-3 SRR2156849 SRR2156850 SRR215685q
+   50  ps
+   51  ls
+   52  wget https://github.com/pachterlab/kallisto/releases/download/v0.44.0/kallisto_linux-v0.44.0.tar.gz
+   53  gzip -d kallisto_linux-v0.44.0.tar.gz 
+   54  tar -xvf kallisto_linux-v0.44.0.tar 
+   55  pwd
+   56  ls kallisto_linux-v0.44.0
+   57  ls
+   58  cd kallisto_linux-v0.44.0/
+   59  pwd
+   60  export PATH=$PATH:/home/ubuntu/kallisto_linux-v0.44.0
+   61  kallisto 
+   62  wget ftp://ftp.ensembl.org/pub/release-67/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh37.67.cdna.all.fa.gz
+   63  mv Homo_sapiens.GRCh37.67.cdna.all.fa.gz ~/.
+   64  cd ~
+   65  head Homo_sapiens.GRCh37.67.cdna.all.fa.gz 
+   66  gunzip Homo_sapiens.GRCh37.67.cdna.all.fa.gz
+   67  head Homo_sapiens.GRCh37.67.cdna.all.fa 
+   68  kallisto index -i hg19.ensembl Homo_sapiens.GRCh37.67.cdna.all.fa
+   69  ls
+   70  ls SRR2156848_quant
+   71  nano run.sh
+   72  sh run.sh
+   73  top
+   74  ls *_quant
+   75  history
+   76  history > my_cmd_log.txt
